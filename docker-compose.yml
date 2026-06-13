@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  watch-party:
+    build: .
+    container_name: watch-party-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - watch-party-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: watch-party-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - watch-party
+    restart: unless-stopped
+    networks:
+      - watch-party-network
+
+networks:
+  watch-party-network:
+    driver: bridge
